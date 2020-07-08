@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: appka
-        image: ngrace1991/akka-sample-cluster-kubernetes:v1
+        image: ngrace1991/akka-sample-cluster-kubernetes:v1.0.4
         # remove for real clusters, useful for minikube
         imagePullPolicy: Always
         readinessProbe:

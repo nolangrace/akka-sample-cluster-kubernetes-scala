@@ -2,6 +2,7 @@
 organization in ThisBuild := "com.lightbend"
 
 name := "akka-sample-cluster-kubernetes"
+version := "v1.0.4"
 
 cinnamon in run := true
 cinnamon in test := true
@@ -48,7 +49,6 @@ libraryDependencies ++= {
     Cinnamon.library.cinnamonJvmMetricsProducer,
     Cinnamon.library.cinnamonPrometheus,
     Cinnamon.library.cinnamonPrometheusHttpServer,
-    Cinnamon.library.cinnamonCHMetrics,
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
     "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % Test,
     "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
