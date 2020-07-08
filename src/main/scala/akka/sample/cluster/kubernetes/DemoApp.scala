@@ -10,7 +10,6 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.management.javadsl.AkkaManagement
-import akka.stream.{ActorAttributes, Supervision}
 import akka.stream.scaladsl.{Sink, Source}
 import akka.{actor => classic}
 
@@ -60,24 +59,10 @@ object DemoApp extends App {
       .named("slow-stream")
       .run()
 
-    val decider: Supervision.Decider = {
-      case e: RuntimeException => {
-        println("ERROR")
-        Supervision.Resume
-      }
-      case _                      => Supervision.Stop
-    }
-
     Source.repeat("Element")
       .throttle(1000, 1.second)
-      .map(x => {
-        val start = System.currentTimeMillis()
-        if(start % 50 == 0)
-          throw new RuntimeException
-        start
-      })
+      .map(x => System.currentTimeMillis())
       .to(Sink.ignore)
-      .withAttributes(ActorAttributes.supervisionStrategy(decider))
       .named("fast-stream")
       .run()
 
