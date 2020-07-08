@@ -1,6 +1,10 @@
+
 organization in ThisBuild := "com.lightbend"
 
 name := "akka-sample-cluster-kubernetes"
+
+cinnamon in run := true
+cinnamon in test := true
 
 scalaVersion := "2.13.0"
 lazy val akkaHttpVersion = "10.1.12"
@@ -17,13 +21,15 @@ Compile / run / fork := true
 
 mainClass in (Compile, run) := Some("akka.sample.cluster.kubernetes.DemoApp")
 
-enablePlugins(JavaServerAppPackaging, DockerPlugin)
+enablePlugins(JavaServerAppPackaging, DockerPlugin, Cinnamon)
 
 dockerExposedPorts := Seq(8080, 8558, 25520)
 dockerUpdateLatest := true
 dockerUsername := sys.props.get("docker.username")
 dockerRepository := sys.props.get("docker.registry")
 dockerBaseImage := "adoptopenjdk:11-jre-hotspot"
+
+resolvers += "Pipelines Model Serving Toolkit" at "https://dl.bintray.com/ngrace/pipelines-model-serving-toolkit"
 
 libraryDependencies ++= {
   Seq(
@@ -37,6 +43,12 @@ libraryDependencies ++= {
     "com.lightbend.akka.discovery" %% "akka-discovery-kubernetes-api" % akkaManagementVersion,
     "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % akkaManagementVersion,
     "com.lightbend.akka.management" %% "akka-management-cluster-http" % akkaManagementVersion,
+    Cinnamon.library.cinnamonAkkaStream,
+    Cinnamon.library.cinnamonAkkaHttp,
+    Cinnamon.library.cinnamonJvmMetricsProducer,
+    Cinnamon.library.cinnamonPrometheus,
+    Cinnamon.library.cinnamonPrometheusHttpServer,
+    Cinnamon.library.cinnamonCHMetrics,
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
     "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % Test,
     "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,

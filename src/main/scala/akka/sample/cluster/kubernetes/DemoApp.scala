@@ -1,14 +1,21 @@
 package akka.sample.cluster.kubernetes
 
+import java.util.Calendar
+
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.ClusterEvent
-import akka.cluster.typed.{ Cluster, Subscribe }
+import akka.cluster.typed.{Cluster, Subscribe}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.management.javadsl.AkkaManagement
-import akka.{ actor => classic }
+import akka.stream.{ActorAttributes, Supervision}
+import akka.stream.scaladsl.{Sink, Source}
+import akka.{actor => classic}
+
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
 object DemoApp extends App {
 
@@ -32,6 +39,49 @@ object DemoApp extends App {
 
     AkkaManagement.get(classicSystem).start()
     ClusterBootstrap.get(classicSystem).start()
+
+    val rand = Math.random()
+
+    Source.repeat("Element")
+      .throttle(100, 1.second)
+      .map(x => System.currentTimeMillis())
+      .mapAsync(10)(startTime => {
+        Future {
+          Thread.sleep((startTime % (150 * 1000)) * 100 )
+
+          startTime
+        }
+      })
+      .map(startTime => {
+        val end = System.currentTimeMillis()
+        end - startTime
+      })
+      .to(Sink.foreach(println))
+      .named("slow-stream")
+      .run()
+
+    val decider: Supervision.Decider = {
+      case e: RuntimeException => {
+        println("ERROR")
+        Supervision.Resume
+      }
+      case _                      => Supervision.Stop
+    }
+
+    Source.repeat("Element")
+      .throttle(1000, 1.second)
+      .map(x => {
+        val start = System.currentTimeMillis()
+        if(start % 50 == 0)
+          throw new RuntimeException
+        start
+      })
+      .to(Sink.ignore)
+      .withAttributes(ActorAttributes.supervisionStrategy(decider))
+      .named("fast-stream")
+      .run()
+
+
     Behaviors.empty
   }, "appka")
 }
