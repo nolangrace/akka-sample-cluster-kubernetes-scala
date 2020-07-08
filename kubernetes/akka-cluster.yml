@@ -4,7 +4,7 @@ metadata:
   labels:
     app: appka
   name: appka
-  namespace: nolan-appka
+  namespace: appka-1
 spec:
   replicas: 3
   selector:
@@ -64,7 +64,7 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: pod-reader
-  namespace: nolan-appka
+  namespace: appka-1
 rules:
 - apiGroups: [""] # "" indicates the core API group
   resources: ["pods"]
